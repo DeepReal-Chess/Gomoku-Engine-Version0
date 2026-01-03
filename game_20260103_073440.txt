@@ -1,0 +1,61 @@
+========================================
+         GOMOKU GAME LOG
+========================================
+Date: 20260103_073442
+Search time: 1000ms per move
+----------------------------------------
+
+Move   1:  BLACK (X) -> H8 (0ms)
+Move   2:  WHITE (O) -> H6 (1000ms)
+Move   3:  BLACK (X) -> F10 (1000ms)
+Move   4:  WHITE (O) -> F7 (1000ms)
+Move   5:  BLACK (X) -> H10 (1000ms)
+Move   6:  WHITE (O) -> G8 (1000ms)
+Move   7:  BLACK (X) -> D12 (1000ms)
+Move   8:  WHITE (O) -> G9 (1000ms)
+Move   9:  BLACK (X) -> H9 (1000ms)
+Move  10:  WHITE (O) -> H11 (0ms)
+Move  11:  BLACK (X) -> G10 (1000ms)
+Move  12:  WHITE (O) -> E10 (0ms)
+Move  13:  BLACK (X) -> J10 (1001ms)
+Move  14:  WHITE (O) -> I10 (0ms)
+Move  15:  BLACK (X) -> I9 (1000ms)
+Move  16:  WHITE (O) -> G7 (0ms)
+Move  17:  BLACK (X) -> K11 (1001ms)
+Move  18:  WHITE (O) -> L12 (0ms)
+Move  19:  BLACK (X) -> J8 (1000ms)
+Move  20:  WHITE (O) -> K7 (0ms)
+Move  21:  BLACK (X) -> G11 (1000ms)
+Move  22:  WHITE (O) -> F12 (0ms)
+Move  23:  BLACK (X) -> J7 (1001ms)
+Move  24:  WHITE (O) -> I8 (0ms)
+Move  25:  BLACK (X) -> E9 (1000ms)
+Move  26:  WHITE (O) -> D8 (0ms)
+Move  27:  BLACK (X) -> J9 (1000ms)
+Move  28:  WHITE (O) -> J6 (0ms)
+Move  29:  BLACK (X) -> J11 (0ms)
+
+----------------------------------------
+RESULT: BLACK (X) WINS!
+Total moves: 29
+----------------------------------------
+
+Final position:
+   A B C D E F G H I J K L M N O 
+ 1 . . . . . . . . . . . . . . . 
+ 2 . . . . . . . . . . . . . . . 
+ 3 . . . . . . . . . . . . . . . 
+ 4 . . . . . . . . . . . . . . . 
+ 5 . . . . . . . . . . . . . . . 
+ 6 . . . . . . . O . O . . . . . 
+ 7 . . . . . O O . . X O . . . . 
+ 8 . . . O . . O X O X . . . . . 
+ 9 . . . . X . O X X X . . . . . 
+10 . . . . O X X X O X . . . . . 
+11 . . . . . . X O . X X . . . . 
+12 . . . X . O . . . . . O . . . 
+13 . . . . . . . . . . . . . . . 
+14 . . . . . . . . . . . . . . . 
+15 . . . . . . . . . . . . . . . 
+
+Move list: 1.H8 H6 2.F10 F7 3.H10 G8 4.D12 G9 5.H9 H11 6.G10 E10 7.J10 I10 8.I9 G7 9.K11 L12 10.J8 K7 11.G11 F12 12.J7 I8 13.E9 D8 14.J9 J6 15.J11
