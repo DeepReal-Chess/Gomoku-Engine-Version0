@@ -54,9 +54,9 @@ Watch the engine play against itself with animated board display:
 The demo will:
 - Display the board updating in real-time
 - Show each move with timing information
-- Save the complete game log to `game_YYYYMMDD_HHMMSS.txt`
+- Save the complete game log to `build/game_YYYYMMDD_HHMMSS.txt`
 
-**Sample game result** (see `build/game_20260103_073440.txt`):
+**Sample game result** (see `game_20260103_073440.txt`):
 - BLACK (X) wins in 29 moves
 - Winning line: J7-J8-J9-J10-J11 (vertical)
 
