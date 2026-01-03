@@ -139,19 +139,21 @@ int Heuristic::evaluate_line(const Board& board, int x, int y, int dx, int dy, i
 int Heuristic::cluster_bonus(const Board& board, const Move& move) const {
     int bonus = 0;
     int empty_count = 0;
-    
-    // Count nearby stones (any color) for clustering and empty squares for space
+    int8_t player = board.current_player();
+
+    // Count nearby stones (only friendly) for clustering and empty squares for space
     for (int dx = -2; dx <= 2; dx++) {
         for (int dy = -2; dy <= 2; dy++) {
             if (dx == 0 && dy == 0) continue;
             int nx = move.x + dx;
             int ny = move.y + dy;
             if (nx >= 0 && nx < BOARD_SIZE && ny >= 0 && ny < BOARD_SIZE) {
-                if (board.get(nx, ny) != EMPTY) {
-                    // Closer stones give more bonus
+                int8_t cell = board.get(nx, ny);
+                if (cell == player) {
+                    // Closer friendly stones give more bonus
                     int dist = std::max(std::abs(dx), std::abs(dy));
                     bonus += SCORE_CLUSTER * (3 - dist);
-                } else {
+                } else if (cell == EMPTY) {
                     // Count empty squares for space bonus
                     empty_count++;
                 }
