@@ -18,19 +18,7 @@ Move MCTS::search(const Board& board) {
 }
 
 Move MCTS::search(const Board& board, int time_limit_ms) {
-    // Check for immediate winning move
-    Move winning = heuristic_.find_winning_move(board);
-    if (winning.is_valid()) {
-        return winning;
-    }
-    
-    // Check for forced blocking move
-    Move blocking = heuristic_.find_blocking_move(board);
-    if (blocking.is_valid()) {
-        return blocking;
-    }
-    
-    // Create root node
+    // Create root node - let MCTS explore fully instead of short-circuiting
     auto root = std::make_unique<MCTSNode>(Move(), nullptr, board.current_player());
     init_untried_moves(root.get(), board);
     
@@ -59,8 +47,13 @@ Move MCTS::search(const Board& board, int time_limit_ms) {
             node = expand(node, sim_board);
         }
         
-        // Rollout
-        double value = rollout(sim_board);
+        // Rollout - skip if terminal node (use fixed terminal value)
+        double value;
+        if (node->is_terminal_node) {
+            value = node->terminal_value;
+        } else {
+            value = rollout(sim_board);
+        }
         
         // Backpropagation
         backpropagate(node, value, board.current_player());
@@ -68,7 +61,7 @@ Move MCTS::search(const Board& board, int time_limit_ms) {
         ++iterations_;
     }
     
-    return select_best_move(root.get());
+    return select_best_move(root.get(), board);
 }
 
 int MCTS::get_root_visits() const {
@@ -133,7 +126,21 @@ MCTSNode* MCTS::expand(MCTSNode* node, Board& board) {
     // Create new node
     board.make_move(move);
     auto child = std::make_unique<MCTSNode>(move, node, board.current_player());
-    init_untried_moves(child.get(), board);
+    
+    // Check if this move resulted in a terminal state
+    if (board.is_terminal()) {
+        child->is_terminal_node = true;
+        int8_t winner = board.get_winner();
+        if (winner == EMPTY) {
+            child->terminal_value = 0.0; // Draw
+        } else {
+            // Value from the perspective of the player who just moved (node's player)
+            // node->player_to_move is who made the move to reach this child
+            child->terminal_value = (winner == node->player_to_move) ? 1.0 : -1.0;
+        }
+    } else {
+        init_untried_moves(child.get(), board);
+    }
     
     MCTSNode* child_ptr = child.get();
     node->children.push_back(std::move(child));
@@ -230,7 +237,32 @@ double MCTS::uct_value(const MCTSNode* node, int parent_visits) const {
     return -exploitation + exploration;
 }
 
-Move MCTS::select_best_move(MCTSNode* root) const {
+Move MCTS::select_best_move(MCTSNode* root, const Board& board) const {
+    // Priority 1: Immediate 5-in-a-row win - always take it
+    Move winning = heuristic_.find_winning_move(board);
+    if (winning.is_valid()) {
+        return winning;
+    }
+    
+    // Priority 2: Block opponent's 4-in-a-row - must block or lose next turn
+    Move blocking = heuristic_.find_blocking_move(board);
+    if (blocking.is_valid()) {
+        return blocking;
+    }
+    
+    // Priority 3: Create open four - guaranteed win (opponent can't block both ends)
+    Move open_four = heuristic_.find_open_four_move(board);
+    if (open_four.is_valid()) {
+        return open_four;
+    }
+    
+    // Priority 4: Block opponent's open three - if we don't, they get open four next turn
+    Move open_three_block = heuristic_.find_open_three_block(board);
+    if (open_three_block.is_valid()) {
+        return open_three_block;
+    }
+    
+    // Priority 5: Use MCTS result
     if (root->children.empty()) {
         // Fallback to untried moves
         if (!root->untried_moves.empty()) {

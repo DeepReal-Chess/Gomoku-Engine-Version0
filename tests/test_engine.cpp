@@ -18,7 +18,7 @@ using namespace gomoku;
 #define ASSERT(cond) do { \
     if (!(cond)) { \
         std::cerr << "\nAssertion failed: " << #cond << " at line " << __LINE__ << std::endl; \
-        assert(false); \
+        std::exit(1); \
     } \
 } while(0)
 

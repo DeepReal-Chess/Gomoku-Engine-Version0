@@ -30,8 +30,12 @@ struct MCTSNode {
     double total_value; // W
     int8_t player_to_move; // Player who will make the next move
     
+    bool is_terminal_node;   // True if this node represents a terminal game state
+    double terminal_value;   // Fixed value for terminal nodes (1.0 = win, -1.0 = loss, 0.0 = draw)
+    
     MCTSNode(const Move& m = Move(), MCTSNode* p = nullptr, int8_t player = BLACK)
-        : move(m), parent(p), visit_count(0), total_value(0.0), player_to_move(player) {}
+        : move(m), parent(p), visit_count(0), total_value(0.0), player_to_move(player),
+          is_terminal_node(false), terminal_value(0.0) {}
     
     double q_value() const {
         return visit_count > 0 ? total_value / visit_count : 0.0;
@@ -82,7 +86,7 @@ private:
     double random_rollout(Board& board);
     
     // Move selection
-    Move select_best_move(MCTSNode* root) const;
+    Move select_best_move(MCTSNode* root, const Board& board) const;
     
     // Utility
     void init_untried_moves(MCTSNode* node, const Board& board);

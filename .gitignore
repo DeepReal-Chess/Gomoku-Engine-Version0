@@ -29,5 +29,8 @@ cmake_install.cmake
 Makefile
 compile_commands.json
 
+# Game logs
+game_*.txt
+
 # macOS
 .DS_Store

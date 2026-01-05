@@ -8,8 +8,27 @@ A high-performance Gomoku (Five-in-a-Row) engine with Monte Carlo Tree Search.
 - Locality-aware legal move generation (Chebyshev radius ≤ 2)
 - Pattern-based heuristic evaluation with threat detection
 - Scientific MCTS with dual rollout policy (heuristic + random)
+- Priority-based move selection with tactical awareness
+- Terminal state detection for faster tree convergence
 - UCI-style command interface
 - Demo mode with animated self-play and game logging
+
+## Move Selection Priority
+
+The engine uses a priority-based move selection system that ensures correct tactical play:
+
+| Priority | Move Type | Description |
+|----------|-----------|-------------|
+| 1 | **Immediate Win** | Complete 5-in-a-row to win the game |
+| 2 | **Block 4-in-a-row** | Must block opponent's winning threat |
+| 3 | **Create Open Four** | 4 stones with both ends open (guaranteed win) |
+| 4 | **Block Open Three** | Prevent opponent from getting open four |
+| 5 | **MCTS Result** | Most-visited move from tree search |
+
+This ensures the engine:
+- Always takes winning moves when available
+- Never misses critical defensive moves
+- Prioritizes creating unstoppable threats over blocking weaker ones
 
 ## Heuristic Evaluation
 
@@ -28,10 +47,21 @@ The engine uses a sophisticated pattern-based heuristic that evaluates moves in 
 | Cluster Bonus | 10/stone | Bonus for nearby stones (weighted by distance) |
 
 **Key features:**
+- **All 4 directions scanned**: Horizontal, vertical, diagonal, and anti-diagonal
 - **Offensive + Defensive scoring**: Each move is evaluated for both attack and defense
 - **Defensive multiplier (1.1×)**: Slightly favors blocking opponent threats
 - **Gap pattern detection**: Recognizes broken patterns like `X_XX` or `XX_X`
-- **Forced move detection**: `find_winning_move()` and `find_blocking_move()` for critical positions
+- **Forced move detection**: `find_winning_move()`, `find_open_four_move()`, `find_blocking_move()`, and `find_open_three_block()`
+
+## MCTS Implementation
+
+The Monte Carlo Tree Search implementation includes several optimizations:
+
+- **UCT Selection**: Uses UCB1 formula with configurable exploration constant (default: 1.2)
+- **Heuristic-guided expansion**: Prioritizes promising moves during node expansion
+- **Dual rollout policy**: Combines heuristic-guided and random rollouts for balanced evaluation
+- **Terminal state detection**: Marks nodes as terminal when a win is detected, using fixed values instead of rollouts
+- **Backpropagation**: Updates values from the perspective of the root player for consistent evaluation
 
 ## Building
 

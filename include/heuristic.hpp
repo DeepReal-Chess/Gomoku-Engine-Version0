@@ -48,8 +48,10 @@ public:
     std::vector<ScoredMove> get_scored_moves(const Board& board) const;
     
     // Quick check for immediate wins/threats
-    Move find_winning_move(const Board& board) const;
-    Move find_blocking_move(const Board& board) const;
+    Move find_winning_move(const Board& board) const;      // Immediate 5-in-a-row
+    Move find_open_four_move(const Board& board) const;    // Creates open four (unstoppable)
+    Move find_blocking_move(const Board& board) const;     // Block opponent's 4-in-a-row
+    Move find_open_three_block(const Board& board) const;  // Block opponent's open three
     
 private:
     // Pattern evaluation

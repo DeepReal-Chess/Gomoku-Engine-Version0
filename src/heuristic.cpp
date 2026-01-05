@@ -239,12 +239,56 @@ Move Heuristic::find_winning_move(const Board& board) const {
     const int dx[] = {1, 0, 1, 1};
     const int dy[] = {0, 1, 1, -1};
     
+    // Only look for immediate 5-in-a-row wins
     for (const auto& move : moves) {
         for (int d = 0; d < 4; d++) {
             int count_pos = count_consecutive(board, move.x, move.y, dx[d], dy[d], player);
             int count_neg = count_consecutive(board, move.x, move.y, -dx[d], -dy[d], player);
+            
+            // With this move placed, we'd have count_pos + 1 + count_neg in a row
+            // Win requires 5 in a row, so count_pos + count_neg >= 4
             if (count_pos + count_neg >= 4) {
                 return move;
+            }
+        }
+    }
+    
+    return Move(-1, -1);
+}
+
+Move Heuristic::find_open_four_move(const Board& board) const {
+    int8_t player = board.current_player();
+    auto moves = board.get_legal_moves();
+    
+    const int dx[] = {1, 0, 1, 1};
+    const int dy[] = {0, 1, 1, -1};
+    
+    // Look for moves that create open four (unstoppable win)
+    // An open four is 4 in a row with BOTH ends empty - opponent can't block both
+    for (const auto& move : moves) {
+        for (int d = 0; d < 4; d++) {
+            int count_pos = count_consecutive(board, move.x, move.y, dx[d], dy[d], player);
+            int count_neg = count_consecutive(board, move.x, move.y, -dx[d], -dy[d], player);
+            
+            // Check if this creates exactly 4 in a row (count_pos + count_neg == 3)
+            if (count_pos + count_neg == 3) {
+                // Check if both ends are open
+                int end_pos_x = move.x + dx[d] * (count_pos + 1);
+                int end_pos_y = move.y + dy[d] * (count_pos + 1);
+                int end_neg_x = move.x - dx[d] * (count_neg + 1);
+                int end_neg_y = move.y - dy[d] * (count_neg + 1);
+                
+                bool open_pos = (end_pos_x >= 0 && end_pos_x < BOARD_SIZE && 
+                                 end_pos_y >= 0 && end_pos_y < BOARD_SIZE &&
+                                 board.get(end_pos_x, end_pos_y) == EMPTY);
+                bool open_neg = (end_neg_x >= 0 && end_neg_x < BOARD_SIZE && 
+                                 end_neg_y >= 0 && end_neg_y < BOARD_SIZE &&
+                                 board.get(end_neg_x, end_neg_y) == EMPTY);
+                
+                // Open four = guaranteed win (opponent can only block one side)
+                if (open_pos && open_neg) {
+                    return move;
+                }
             }
         }
     }
@@ -260,7 +304,7 @@ Move Heuristic::find_blocking_move(const Board& board) const {
     const int dx[] = {1, 0, 1, 1};
     const int dy[] = {0, 1, 1, -1};
     
-    // First check for opponent winning threats (4 in a row)
+    // ONLY block immediate threats: opponent's 4-in-a-row that would win next turn
     for (const auto& move : moves) {
         for (int d = 0; d < 4; d++) {
             int count_pos = count_consecutive(board, move.x, move.y, dx[d], dy[d], opponent);
@@ -271,14 +315,27 @@ Move Heuristic::find_blocking_move(const Board& board) const {
         }
     }
     
-    // Then check for open threes that must be blocked
+    return Move(-1, -1);
+}
+
+Move Heuristic::find_open_three_block(const Board& board) const {
+    int8_t player = board.current_player();
+    int8_t opponent = (player == BLACK) ? WHITE : BLACK;
+    auto moves = board.get_legal_moves();
+    
+    const int dx[] = {1, 0, 1, 1};
+    const int dy[] = {0, 1, 1, -1};
+    
+    // Find opponent's open threes that would become open fours if not blocked
     Move best_block(-1, -1);
     int best_threat = 0;
     
     for (const auto& move : moves) {
         for (int d = 0; d < 4; d++) {
             int threat = evaluate_line(board, move.x, move.y, dx[d], dy[d], opponent);
-            if (threat >= SCORE_FOUR_OPEN && threat > best_threat) {
+            // SCORE_FOUR_OPEN indicates this move would complete an open four for opponent
+            // SCORE_THREE_OPEN indicates opponent has open three in this direction
+            if (threat >= SCORE_THREE_OPEN && threat > best_threat) {
                 best_threat = threat;
                 best_block = move;
             }
